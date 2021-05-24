@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "calls"
-version = "0.1.0"
+version = "0.1.1"
 description = "Utilities for callables"
 authors = ["Arie Bovenberg <a.c.bovenberg@gmail.com>"]
 license = "MIT"
