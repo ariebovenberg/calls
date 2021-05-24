@@ -17,3 +17,22 @@
    :target: https://github.com/psf/black
 
 Simple, typed, composable tools for callables.
+
+Quickstart
+----------
+
+All utilities are directly importable.
+See `the docs <https://calls.rtfd.io>`_ for a complete overview.
+
+.. code-block:: python
+
+  >>> from calls import raises, const, identity, flip
+
+Installation
+------------
+
+It's available on PyPI.
+
+.. code-block:: bash
+
+  pip install calls
