@@ -1,16 +1,16 @@
 [tool.poetry]
 name = "calls"
-version = "0.0.1"
+version = "0.1.0"
 description = "Utilities for callables"
 authors = ["Arie Bovenberg <a.c.bovenberg@gmail.com>"]
 license = "MIT"
 classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
+    "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
 ]
 packages = [
     { include = "calls", from = "src" },
@@ -20,7 +20,7 @@ include = ["CHANGELOG.rst", "README.rst"]
 repository = "https://github.com/ariebovenberg/calls"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.6"
 importlib-metadata = {version = "^1.0", python = "<3.8"}
 typing-extensions = "^3.7.4"
 
