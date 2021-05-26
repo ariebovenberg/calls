@@ -1,6 +1,14 @@
 Changelog
 =========
 
+0.2.0 (2021-05-27)
+------------------
+
+- Rename ``const`` to ``always``.
+- Add ``pipe`` function.
+- Relax typing of ``raises`` function.
+- Ensure results are picklable if possible.
+
 0.1.1 (2021-05-24)
 ------------------
 
