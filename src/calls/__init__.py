@@ -1,4 +1,5 @@
-from typing import Any, Callable, NoReturn, TypeVar
+from dataclasses import dataclass
+from typing import Any, Callable, Tuple, TypeVar, overload
 
 from typing_extensions import Protocol
 
@@ -13,13 +14,19 @@ except ModuleNotFoundError:  # pragma: no cover
 Q = TypeVar("Q")
 R = TypeVar("R")
 S = TypeVar("S")
-T = TypeVar("T", contravariant=True)
-U = TypeVar("U", contravariant=True)
-V = TypeVar("V", covariant=True)
+V = TypeVar("V", contravariant=True)
+W = TypeVar("W", contravariant=True)
+X = TypeVar("X", covariant=True)
 
 
-def raises(__e: BaseException) -> Callable[..., NoReturn]:
-    """Create a callable which raises the given exception
+# We return `Any` here so the result fits anywhere, type-wise.
+# Returning `typing.NoReturn` would be technically correct,
+# but render the function uncomposable.
+def raises(__e: BaseException) -> Callable[..., Any]:
+    """Create a callable which raises the given exception.
+
+    The return value is marked :data:`~typing.Any` so its signature
+    fits anywhere a callable is needed.
 
     Example
     -------
@@ -30,26 +37,66 @@ def raises(__e: BaseException) -> Callable[..., NoReturn]:
     Traceback (most recent call last):
       File "<stdin>", line 1, in <module>
     ValueError: foo
+
+    Note
+    ----
+    The resulting callable is picklable if the given value is.
     """
-
-    def __raises(*_: Any, **__: Any) -> NoReturn:
-        raise __e
-
-    return __raises
+    return __raises(__e)
 
 
-def const(__v: S) -> Callable[..., S]:
+@dataclass(frozen=True, repr=False)
+class __raises:
+    __slots__ = ("_exception",)
+    _exception: BaseException
+
+    def __call__(*args: Any, **_: Any) -> Any:
+        raise args[0]._exception  # unnamed arg as to not conflict with kwargs
+
+    def __repr__(self) -> str:
+        return f"raises({self._exception!r})"
+
+    def __getstate__(self) -> object:
+        return self._exception
+
+    def __setstate__(self, s: object) -> None:
+        object.__setattr__(self, "_exception", s)
+
+
+def always(__v: S) -> Callable[..., S]:
     """Create a callable which always returns the same value
 
     Example
     -------
 
-    >>> f = const(4)
+    >>> f = always(4)
     ...
     >>> f()  # any arguments are accepted
     4
+
+    Note
+    ----
+    The resulting callable is picklable if the given value is.
     """
-    return lambda *_, **__: __v
+    return __always(__v)
+
+
+@dataclass(frozen=True, repr=False)
+class __always:
+    __slots__ = ("_value",)
+    _value: Any
+
+    def __call__(*args: Any, **_: Any) -> Any:
+        return args[0]._value  # unnamed arg as to not conflict with any kwargs
+
+    def __repr__(self) -> str:
+        return f"always({self._value!r})"
+
+    def __getstate__(self) -> object:
+        return self._value
+
+    def __setstate__(self, s: object) -> None:
+        object.__setattr__(self, "_value", s)
 
 
 def identity(__v: S) -> S:
@@ -79,16 +126,174 @@ def flip(__f: "BinaryFunction[Q, R, S]") -> "BinaryFunction[R, Q, S]":
     5.13
     >>> f(0, 3.4)
     3
+
+    Note
+    ----
+    The resulting callable is picklable if the original is.
     """
-
-    def __flipped(__a: R, __b: Q) -> S:
-        return __f(__b, __a)
-
-    return __flipped
+    return __flip(__f)
 
 
-class UnaryFunction(Protocol[T, V]):
-    """A function/callable taking exactly one argument.
+@dataclass(frozen=True, repr=False)
+class __flip:
+    __slots__ = ("_function",)
+    _function: Any
+
+    def __call__(self, __a: Any, __b: Any) -> Any:
+        return self._function(__b, __a)
+
+    def __repr__(self) -> str:
+        return f"flip({self._function!r})"
+
+    def __getstate__(self) -> object:
+        return self._function
+
+    def __setstate__(self, s: object) -> None:
+        object.__setattr__(self, "_function", s)
+
+
+T1 = TypeVar("T1")
+T2 = TypeVar("T2")
+T3 = TypeVar("T3")
+T4 = TypeVar("T4")
+T5 = TypeVar("T5")
+T6 = TypeVar("T6")
+T7 = TypeVar("T7")
+T8 = TypeVar("T8")
+T9 = TypeVar("T9")
+
+
+# The copious overloads are to enable mypy to
+# deduce the proper callable types -- up to a limit.
+
+
+@overload
+def pipe() -> Callable[[T1], T1]:
+    ...
+
+
+@overload  # noqa: F811
+def pipe(__f1: Callable[[T1], T2]) -> Callable[[T1], T2]:
+    ...
+
+
+@overload  # noqa: F811
+def pipe(
+    __f1: Callable[[T1], T2], __f2: Callable[[T2], T3]
+) -> Callable[[T1], T3]:
+    ...
+
+
+@overload  # noqa: F811
+def pipe(
+    __f1: Callable[[T1], T2],
+    __f2: Callable[[T2], T3],
+    __f3: Callable[[T3], T4],
+) -> Callable[[T1], T4]:
+    ...
+
+
+@overload  # noqa: F811
+def pipe(
+    __f1: Callable[[T1], T2],
+    __f2: Callable[[T2], T3],
+    __f3: Callable[[T3], T4],
+    __f4: Callable[[T4], T5],
+) -> Callable[[T1], T5]:
+    ...
+
+
+@overload  # noqa: F811
+def pipe(
+    __f1: Callable[[T1], T2],
+    __f2: Callable[[T2], T3],
+    __f3: Callable[[T3], T4],
+    __f4: Callable[[T4], T5],
+    __f5: Callable[[T5], T6],
+) -> Callable[[T1], T6]:
+    ...
+
+
+@overload  # noqa: F811
+def pipe(
+    __f1: Callable[[T1], T2],
+    __f2: Callable[[T2], T3],
+    __f3: Callable[[T3], T4],
+    __f4: Callable[[T4], T5],
+    __f5: Callable[[T5], T6],
+    __f6: Callable[[T6], T7],
+) -> Callable[[T1], T7]:
+    ...
+
+
+@overload  # noqa: F811
+def pipe(
+    __f1: Callable[[T1], T2],
+    __f2: Callable[[T2], T3],
+    __f3: Callable[[T3], T4],
+    __f4: Callable[[T4], T5],
+    __f5: Callable[[T5], T6],
+    __f6: Callable[[T6], T7],
+    __f7: Callable[[T7], T8],
+) -> Callable[[T1], T8]:
+    ...
+
+
+@overload  # noqa: F811
+def pipe(
+    __f1: Callable,
+    __f2: Callable,
+    __f3: Callable,
+    __f4: Callable,
+    __f5: Callable,
+    __f6: Callable,
+    __f7: Callable,
+    *__fn: Callable,
+) -> Callable:
+    ...
+
+
+def pipe(*__fs: Any) -> Any:  # noqa: F811
+    """Create a new callable by piping several in succession
+
+    Example
+    -------
+
+    >>> fn = pipe(float, lambda x: x / 4, int)
+    >>> fn('9.3')
+    9
+
+    Note
+    ----
+    * Type checking is supported up to 7 functions,
+      due to limitations of the Python type system.
+    * The resulting callable is picklable if the given callables are.
+    """
+    return __pipe(__fs)
+
+
+@dataclass(frozen=True, repr=False)
+class __pipe:
+    __slots__ = ("_functions",)
+    _functions: Tuple[Callable[[Any], Any], ...]
+
+    def __call__(self, value: Any) -> Any:
+        for f in self._functions:
+            value = f(value)
+        return value
+
+    def __repr__(self) -> str:
+        return f"pipe{self._functions}"
+
+    def __getstate__(self) -> object:
+        return self._functions
+
+    def __setstate__(self, s: object) -> None:
+        object.__setattr__(self, "_functions", s)
+
+
+class UnaryFunction(Protocol[W, X]):
+    """:class:`~typing.Protocol` for a callable taking exactly one argument.
 
     Examples of objects satisfying this protocol:
 
@@ -102,12 +307,24 @@ class UnaryFunction(Protocol[T, V]):
     >>> (7).__rtruediv__
     """
 
-    def __call__(self, __value: T) -> V:
+    def __call__(self, __value: W) -> X:
         """ """
 
 
-class BinaryFunction(Protocol[T, U, V]):
-    """A function/callable which takes exactly two arguments."""
+class BinaryFunction(Protocol[V, W, X]):
+    """:class:`~typing.Protocol` for a callable which takes exactly two arguments.
 
-    def __call__(self, __a: T, __b: U) -> V:
+    Examples of objects satisfying this protocol:
+
+    >>> # Below are all BinaryFunction[str, int, str]
+    ...
+    >>> def myfunc(s: str, w: int) -> str:
+    ...     return a.center(b)
+    ...
+    >>> lambda s, w: s.center(w)
+    ...
+    >>> str.center
+    """
+
+    def __call__(self, __a: V, __b: W) -> X:
         """ """
