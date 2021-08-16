@@ -261,7 +261,7 @@ def pipe(*__fs: Any) -> Any:  # noqa: F811
 
     >>> fn = pipe(float, lambda x: x / 4, int)
     >>> fn('9.3')
-    9
+    2
 
     Note
     ----
