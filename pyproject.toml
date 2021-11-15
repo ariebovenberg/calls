@@ -22,7 +22,7 @@ repository = "https://github.com/ariebovenberg/calls"
 [tool.poetry.dependencies]
 python = "^3.6"
 importlib-metadata = {version = ">=1,<5", python = "<3.8"}
-typing-extensions = "^3.7.4"
+typing-extensions = ">=3.7.4,<5.0.0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.9.0"
