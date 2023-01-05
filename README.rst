@@ -19,6 +19,16 @@
 Simple, typed, composable tools for callables. 
 They're also good Python citizens with nice ``repr``, mypy support, and picklability.
 
+Why
+---
+
+In contrast to other libraries,
+``calls`` focusses on rigorous simplicity and offers:
+
+- **Typing** compatible with all type checkers (not only ``mypy``)
+- **Stable** and semantically versioned API
+- **Simple** code with no magic or clever hacks
+
 Quickstart
 ----------
 

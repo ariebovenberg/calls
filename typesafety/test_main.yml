@@ -1,0 +1,14 @@
+- case: raises
+  main: |
+    from calls import raises
+    from typing import Callable
+    
+    def myfunction(c: Callable[[], str]) -> None:
+        ...
+
+    myfunction(raises(ValueError('foo')))
+
+    raises(ValueError())()
+    raises(ValueError())(4, 5, foo=5)
+
+    raises(5)  # E: Argument 1 to "raises" has incompatible type "int"; expected "BaseException"
